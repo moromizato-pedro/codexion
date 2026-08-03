@@ -1,0 +1,8 @@
+# Executable
+codexion
+
+# Temporary files
+*.swp
+
+# Object files
+*.o
