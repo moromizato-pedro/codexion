@@ -6,7 +6,7 @@ INCLUDE_DIR := ./include
 CC := cc
 CFLAGS := -Wall -Wextra -Werror
 
-SRC_FILE_NAME := parser.c hub.c threads.c
+SRC_FILE_NAME := parser.c hub.c threads.c coders.c time.c
 SRC_FILES := $(SRC_FILE_NAME:%.c=$(SRC_DIR)/%.o)
 
 CFILES := main.c $(SRC_FILES)

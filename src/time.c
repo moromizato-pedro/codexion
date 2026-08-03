@@ -1,31 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   threads.c                                          :+:      :+:    :+:   */
+/*   time.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: pedrohe3 <pedrohe3@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/30 20:24:19 by pedrohe3          #+#    #+#             */
-/*   Updated: 2026/08/03 21:47:50 by pedrohe3         ###   ########.fr       */
+/*   Created: 2026/07/31 17:55:44 by pedrohe3          #+#    #+#             */
+/*   Updated: 2026/07/31 17:58:49 by pedrohe3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/codexion.h"
 
-void	send_n_coders_home(t_coder *coders, int n)
+int	get_monotonic_time(struct timespec *tp)
 {
-	int	i;
-
-	i = -1;
-	while (++i < n)
-		pthread_join(coders[i].th, NULL);
-}
-
-void	clear_n_dongles(t_dongle *dongles, int n)
-{
-	int	i;
-
-	i = -1;
-	while (++i < n)
-		pthread_mutex_destroy(&dongles[i].mut);
+	if (clock_gettime(CLOCK_MONOTONIC, tp) == -1)
+	{
+		perror("clock_gettime");
+		exit(EXIT_FAILURE);
+	}
+	return (1);
 }

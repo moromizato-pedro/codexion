@@ -6,79 +6,88 @@
 /*   By: pedrohe3 <pedrohe3@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/30 20:34:53 by pedrohe3          #+#    #+#             */
-/*   Updated: 2026/07/30 21:19:27 by pedrohe3         ###   ########.fr       */
+/*   Updated: 2026/08/03 23:25:26 by pedrohe3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/codexion.h"
 
-int	create_hub(t_args args)
+int	create_hub(t_args *args)
 {
 	t_hub	hub;
 
-	hub.th = malloc(sizeof(pthread_t) * args.n_coders);
-	hub.mut = malloc(sizeof(pthread_mutex_t) * (args.n_coders));
-	if (!hub.mut || !hub.th)
+	hub.dongles = setup_n_dongles(args->n_coders);
+	if (!hub.dongles)
 	{
-		hub_clear(hub);
+		free_hub(&hub);
+		printf("Error: Failed to create and initialize dongles structure\n");
 		return (0);
 	}
-	if (!create_n_threads(hub, args))
+	hub.coders = recruit_n_coders(&hub, args);
+	if (!hub.coders)
 	{
-		hub_clear(hub);
-		printf("Error: Failed to create threads\n");
+		clear_n_dongles(hub.dongles, args->n_coders);
+		free_hub(&hub);
+		printf("Error: Failed to create all threads\n");
 		return (0);
 	}
-	if (!join_n_threads(hub, args.n_coders))
-	{
-		hub_clear(hub);
-		printf("Error: Failed to join the threads\n");
-		return (0);
-	}
-	pthread_clear(hub, args.n_coders);
-	hub_clear(hub);
+	clear_n_dongles(hub.dongles, args->n_coders);
+	send_n_coders_home(hub.coders, args->n_coders);
+	free_hub(&hub);
 	return (1);
 }
 
-int	create_n_threads(t_hub hub, t_args args)
+t_dongle	*setup_n_dongles(int n_dongles)
 {
-	int	i;
+	int			i;
+	t_dongle	*dongles;
 
+	dongles = malloc(sizeof(t_dongle) * n_dongles);
+	if (!dongles)
+		return (NULL);
 	i = -1;
-	while (++i < args.n_coders)
+	while (++i < n_dongles)
 	{
-		pthread_mutex_init(&hub.mut[i], NULL);
-		if (!create_thread(hub, args, i))
+		dongles[i].id = i;
+		pthread_mutex_init(&dongles[i].mut, NULL);
+	}
+	return (dongles);
+}
+
+t_coder	*recruit_n_coders(t_hub *hub, t_args *args)
+{
+	int		i;
+	t_coder	*coders;
+
+	coders = malloc(sizeof(t_coder) * args->n_coders);
+	if (!coders)
+		return (0);
+	i = -1;
+	while (++i < args->n_coders)
+	{
+		coders[i].id = i;
+		coders[i].args = args;
+		coders[i].l_dongle = &hub->dongles[i];
+		if (i == args->n_coders - 1)
+			coders[i].r_dongle = &hub->dongles[0];
+		else
+			coders[i].r_dongle = &hub->dongles[i + 1];
+		if (pthread_create(&coders[i].th, NULL, work, (void *)&coders[i]) != 0)
 		{
 			printf("ERROR: Failed creating thread at iteration '%d'\n", i);
-			pthread_clear(hub, i);
-			return (0);
+			send_n_coders_home(coders, i + 1);
+			free(coders);
+			return (NULL);
 		}
 	}
-	return (1);
+	return (coders);
 }
 
-int	join_n_threads(t_hub hub, int n_coders)
+void	free_hub(t_hub *hub)
 {
-	int	i;
-
-	i = -1;
-	while (++i < n_coders)
-	{
-		if (pthread_join(hub.th[i], NULL) != 0)
-		{
-			pthread_clear(hub, n_coders);
-			return (0);
-		}
-	}
-	return (1);
-}
-
-void	*hub_clear(t_hub hub)
-{
-	if (hub.th)
-		free(hub.th);
-	if (hub.mut)
-		free(hub.mut);
-	return (NULL);
+	if (hub->coders)
+		free(hub->coders);
+	if (hub->dongles)
+		free(hub->dongles);
+	return ;
 }
