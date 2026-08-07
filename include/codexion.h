@@ -6,7 +6,7 @@
 /*   By: pedro <pedrohe3@student.42porto.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 18:23:24 by pedro             #+#    #+#             */
-/*   Updated: 2026/08/03 21:40:18 by pedrohe3         ###   ########.fr       */
+/*   Updated: 2026/08/07 19:09:31 by pedrohe3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,6 @@ typedef struct s_args // 8ints + 1ptr = 40bytes
 	int				t_refactor;
 	int				n_compiles_req;
 	int				dongle_cooldown;
-	int				id;
-	pthread_mutex_t	*dongles;
 	char			*scheduler;
 }	t_args;
 
@@ -46,9 +44,21 @@ typedef struct s_coder	t_coder;
 
 typedef struct s_hub // 2ptr = 16bytes
 {
+	int		status;
+	int		*compile_count;
+	double		clock_start;
 	t_coder		*coders;
 	t_dongle	*dongles;
+	t_args		*args;
+	pthread_t	monitor;
 }	t_hub;
+
+enum e_status
+{
+	WORKING,
+	BURNED_OUT,
+	WORK_DONE
+};
 
 typedef struct s_dongle
 {
@@ -72,21 +82,26 @@ void		free_hub(t_hub *hub);
 typedef struct s_coder
 {
 	int			id;
+	int			*status;
+	int			*compile_count;
+	double			last_compile_start;
+	double			*clock_start;
 	pthread_t	th;
 	t_args		*args;
 	t_dongle	*l_dongle;
 	t_dongle	*r_dongle;
 }	t_coder;
 
-//void		*send_n_coders_home(t_hub hub, int n);
 void		send_n_coders_home(t_coder *coders, int n);
 void		clear_n_dongles(t_dongle *dongles, int n);
+void		*monitor(void *hub_ptr);
 void		*work(void *args_ptr);
-void		*refactor(void);
-void		*debug(void);
-void		*compile(void);
+void		*compile(t_coder *coder);
+void		*debug(t_coder *coder);
+void		*refactor(t_coder *coder);
+void		recruit_supervisor(t_hub *hub);
 
 // Time
-int			get_monotonic_time(struct timespec *tp);
+double		now(void);
 
 #endif
