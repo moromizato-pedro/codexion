@@ -6,7 +6,7 @@
 /*   By: pedro <pedrohe3@student.42porto.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 18:23:24 by pedro             #+#    #+#             */
-/*   Updated: 2026/08/07 19:09:31 by pedrohe3         ###   ########.fr       */
+/*   Updated: 2026/08/24 19:40:27 by pedrohe3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ typedef struct s_hub // 2ptr = 16bytes
 
 enum e_status
 {
+	WAITING,
 	WORKING,
 	BURNED_OUT,
 	WORK_DONE

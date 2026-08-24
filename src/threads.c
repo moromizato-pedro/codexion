@@ -6,7 +6,7 @@
 /*   By: pedrohe3 <pedrohe3@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/30 20:24:19 by pedrohe3          #+#    #+#             */
-/*   Updated: 2026/08/07 19:21:15 by pedrohe3         ###   ########.fr       */
+/*   Updated: 2026/08/24 19:57:30 by pedrohe3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,9 +42,11 @@ void	*monitor(void *hub_ptr)
 	hub = (t_hub *)hub_ptr;
 	compiles_req = hub->args->n_compiles_req;
 	printf("Start monitoring...\n");
+	while (hub->status == WAITING)
+		continue ;
 	while (hub->status == WORKING)
 	{
-		compiles_missing = 0;
+		compiles_missing = compiles_req;
 		i = -1;
 		while (++i < hub->args->n_coders)
 		{
@@ -56,8 +58,8 @@ void	*monitor(void *hub_ptr)
 				printf("Coder[%d]: (passed)%.0f > %d(t_burnout)? %d\n", i, passed, hub->args->t_burnout, passed > hub->args->t_burnout);
 				hub->status = BURNED_OUT;
 			}
-			if (hub->compile_count[i] < compiles_req)
-				compiles_missing += 1;
+			if (hub->compile_count[i] >= compiles_req)
+				compiles_missing -= 1;
 		}
 		if (compiles_missing == 0)
 		{

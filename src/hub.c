@@ -6,7 +6,7 @@
 /*   By: pedrohe3 <pedrohe3@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/30 20:34:53 by pedrohe3          #+#    #+#             */
-/*   Updated: 2026/08/07 19:19:39 by pedrohe3         ###   ########.fr       */
+/*   Updated: 2026/08/24 19:57:45 by pedrohe3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,8 @@ int	create_hub(t_args *args)
 	t_hub	hub;
 
 	hub.args = args;
-	hub.status = WORKING;
+	printf("n_coders = %d | t_burnout = %d | t_compile = %d | t_debug = %d | t_refactor = %d | n_compiles_req = %d | dong_cooldown = %d | sched = %s\n", args->n_coders, args->t_burnout, args->t_compile, args->t_debug, args->t_refactor, args->n_compiles_req, args->dongle_cooldown, args->scheduler);
+	hub.status = WAITING;
 	hub.compile_count = malloc(sizeof(int) * args->n_coders);
 	memset(hub.compile_count, 0, sizeof(int) * args->n_coders);
 	hub.dongles = setup_n_dongles(args->n_coders);
@@ -27,7 +28,10 @@ int	create_hub(t_args *args)
 		printf("Error: Failed to create and initialize dongles structure\n");
 		return (0);
 	}
-	hub.clock_start = now();
+	hub.clock_start = -1;
+	hub.coders = NULL;
+	recruit_supervisor(&hub);
+	usleep(500);
 	hub.coders = recruit_n_coders(&hub, args);
 	if (!hub.coders)
 	{
@@ -36,9 +40,10 @@ int	create_hub(t_args *args)
 		printf("Error: Failed to create all threads\n");
 		return (0);
 	}
-	recruit_supervisor(&hub);
-	send_n_coders_home(hub.coders, args->n_coders);
+	hub.clock_start = now();
+	hub.status = WORKING;
 	pthread_join(hub.monitor, NULL);
+	send_n_coders_home(hub.coders, args->n_coders);
 	clear_n_dongles(hub.dongles, args->n_coders);
 	free_hub(&hub);
 	return (1);
