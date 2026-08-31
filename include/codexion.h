@@ -6,7 +6,7 @@
 /*   By: pedro <pedrohe3@student.42porto.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 18:23:24 by pedro             #+#    #+#             */
-/*   Updated: 2026/08/24 19:40:27 by pedrohe3         ###   ########.fr       */
+/*   Updated: 2026/08/31 16:48:05 by pedrohe3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <pthread.h>
 # include <unistd.h>
 # include <time.h>
+# include <stdarg.h>
 
 // Parser
 typedef struct s_args // 8ints + 1ptr = 40bytes 
@@ -51,6 +52,8 @@ typedef struct s_hub // 2ptr = 16bytes
 	t_dongle	*dongles;
 	t_args		*args;
 	pthread_t	monitor;
+	pthread_mutex_t	status_mut;
+	pthread_mutex_t	log_mut;
 }	t_hub;
 
 enum e_status
@@ -91,18 +94,23 @@ typedef struct s_coder
 	t_args		*args;
 	t_dongle	*l_dongle;
 	t_dongle	*r_dongle;
+	t_hub		*hub;
 }	t_coder;
 
 void		send_n_coders_home(t_coder *coders, int n);
 void		clear_n_dongles(t_dongle *dongles, int n);
 void		*monitor(void *hub_ptr);
 void		*work(void *args_ptr);
-void		*compile(t_coder *coder);
 void		*debug(t_coder *coder);
 void		*refactor(t_coder *coder);
 void		recruit_supervisor(t_hub *hub);
+int		compile(t_coder *coder);
+int		try_lock_dongles(t_coder *coder);
 
 // Time
 double		now(void);
+
+// Log
+void		protected_log(t_hub *hub, const char *format, ...);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: pedrohe3 <pedrohe3@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/30 20:34:53 by pedrohe3          #+#    #+#             */
-/*   Updated: 2026/08/24 19:57:45 by pedrohe3         ###   ########.fr       */
+/*   Updated: 2026/08/31 19:31:21 by pedrohe3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ int	create_hub(t_args *args)
 		printf("Error: Failed to create and initialize dongles structure\n");
 		return (0);
 	}
+	pthread_mutex_init(&hub.status_mut, NULL);
+	pthread_mutex_init(&hub.log_mut, NULL);
 	hub.clock_start = -1;
 	hub.coders = NULL;
 	recruit_supervisor(&hub);
@@ -42,9 +44,11 @@ int	create_hub(t_args *args)
 	}
 	hub.clock_start = now();
 	hub.status = WORKING;
-	pthread_join(hub.monitor, NULL);
 	send_n_coders_home(hub.coders, args->n_coders);
+	pthread_join(hub.monitor, NULL);
 	clear_n_dongles(hub.dongles, args->n_coders);
+	pthread_mutex_destroy(&hub.status_mut);
+	pthread_mutex_destroy(&hub.log_mut);
 	free_hub(&hub);
 	return (1);
 }
@@ -84,6 +88,7 @@ t_coder	*recruit_n_coders(t_hub *hub, t_args *args)
 		coders[i].clock_start = &hub->clock_start;
 		coders[i].args = args;
 		coders[i].l_dongle = &hub->dongles[i];
+		coders[i].hub = hub;
 		if (i == args->n_coders - 1)
 			coders[i].r_dongle = &hub->dongles[0];
 		else
