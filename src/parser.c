@@ -6,27 +6,11 @@
 /*   By: pedrohe3 <pedrohe3@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/30 20:25:06 by pedrohe3          #+#    #+#             */
-/*   Updated: 2026/07/30 20:25:08 by pedrohe3         ###   ########.fr       */
+/*   Updated: 2026/11/09 17:22:40 by pedrohe3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/codexion.h"
-
-char	*parse_scheduler(char *arg, char *name)
-{
-	if (strcmp("fifo", arg) == 0 || strcmp("edf", arg) == 0)
-		return (arg);
-	printf("Parsing error: \'%s\' = %s, must be 'fifo' or 'edf'.\n", name, arg);
-	return ("");
-}
-
-int	parse_pos_int(char *arg, char *name)
-{
-	if (atoi(arg) > 0)
-		return (atoi(arg));
-	printf("Parsing error: \'%s\' = %s, value must be positive.\n", name, arg);
-	return (0);
-}
 
 int	validate_args(char **av)
 {
@@ -48,6 +32,22 @@ int	validate_args(char **av)
 		return (1);
 	printf("Error: Failed to parse, exiting program.\n");
 	return (0);
+}
+
+int	parse_pos_int(char *arg, char *name)
+{
+	if (atoi(arg) > 0)
+		return (atoi(arg));
+	printf("Parsing error: \'%s\' = %s, value must be positive.\n", name, arg);
+	return (0);
+}
+
+char	*parse_scheduler(char *arg, char *name)
+{
+	if (strcmp("fifo", arg) == 0 || strcmp("edf", arg) == 0)
+		return (arg);
+	printf("Parsing error: \'%s\' = %s, must be 'fifo' or 'edf'.\n", name, arg);
+	return ("");
 }
 
 t_args	parse_args(char **av)

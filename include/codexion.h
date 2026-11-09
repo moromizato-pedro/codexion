@@ -6,7 +6,7 @@
 /*   By: pedro <pedrohe3@student.42porto.com>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/07 18:23:24 by pedro             #+#    #+#             */
-/*   Updated: 2026/08/31 16:48:05 by pedrohe3         ###   ########.fr       */
+/*   Updated: 2026/11/09 17:28:00 by pedrohe3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,8 @@ typedef struct s_hub // 2ptr = 16bytes
 	int		status;
 	int		*compile_count;
 	double		clock_start;
-	t_coder		*coders;
 	t_dongle	*dongles;
+	t_coder		*coders;
 	t_args		*args;
 	pthread_t	monitor;
 	pthread_mutex_t	status_mut;
@@ -59,6 +59,7 @@ typedef struct s_hub // 2ptr = 16bytes
 enum e_status
 {
 	WAITING,
+	CONFIGURING,
 	WORKING,
 	BURNED_OUT,
 	WORK_DONE

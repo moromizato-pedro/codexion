@@ -6,7 +6,7 @@
 /*   By: pedrohe3 <pedrohe3@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/30 20:24:19 by pedrohe3          #+#    #+#             */
-/*   Updated: 2026/08/31 19:31:05 by pedrohe3         ###   ########.fr       */
+/*   Updated: 2026/11/09 18:49:35 by pedrohe3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,18 +41,21 @@ void	*monitor(void *hub_ptr)
 
 	hub = (t_hub *)hub_ptr;
 	compiles_req = hub->args->n_compiles_req;
-	printf("Start monitoring...\n");
+	protected_log(hub, "Start monitoring...\n");
 	while (1)
 	{
 		pthread_mutex_lock(&hub->status_mut);
-		should_continue = (hub->status != WAITING);
+		should_continue = (hub->status == CONFIGURING);
 		pthread_mutex_unlock(&hub->status_mut);
 		if (should_continue)
 			break ;
 		usleep(500);
 		continue ;
 	}
-	printf("Monitor start working\n");
+	protected_log(hub, "Monitor start working\n");
+	pthread_mutex_lock(&hub->status_mut);
+	hub->status = WORKING;
+	pthread_mutex_unlock(&hub->status_mut);
 	while (1)
 	{
 		pthread_mutex_lock(&hub->status_mut);
@@ -67,9 +70,9 @@ void	*monitor(void *hub_ptr)
 			passed = now() - hub->coders[i].last_compile_start;
 			if (passed > hub->args->t_burnout)
 			{
-				printf("%.0f %d burned out\n", now() - hub->clock_start, hub->coders[i].id);
-				printf("Coder[%d]: (passed)%.0f > %d(t_burnout)? %d\n", i, passed, hub->args->t_burnout, passed > hub->args->t_burnout);
-				printf("%.0f\n%.0f\n", now(), hub->coders[i].last_compile_start);
+				protected_log(hub, "%.0f %d burned out\n", now() - hub->clock_start, hub->coders[i].id);
+				protected_log(hub, "		Coder[%d]: (passed)%.0f > %d(t_burnout)? %d\n", i, passed, hub->args->t_burnout, passed > hub->args->t_burnout);
+				protected_log(hub, "		%.0f\n		%.0f\n", now(), hub->coders[i].last_compile_start);
 				pthread_mutex_lock(&hub->status_mut);
 				hub->status = BURNED_OUT;
 				pthread_mutex_unlock(&hub->status_mut);
@@ -83,10 +86,10 @@ void	*monitor(void *hub_ptr)
 			pthread_mutex_lock(&hub->status_mut);
 			hub->status = WORK_DONE;
 			pthread_mutex_unlock(&hub->status_mut);
-			printf("All coders achieved at least %d compiles!\n", compiles_req);
+			protected_log(hub, "All coders achieved at least %d compiles!\n", compiles_req);
 		}
 		usleep(500);
 	}
-	printf("End of monitoring...\n");
+	protected_log(hub, "End of monitoring...\n");
 	return (NULL);
 }

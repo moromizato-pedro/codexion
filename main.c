@@ -6,7 +6,7 @@
 /*   By: pedrohe3 <pedrohe3@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/30 20:24:29 by pedrohe3          #+#    #+#             */
-/*   Updated: 2026/08/07 00:47:26 by pedrohe3         ###   ########.fr       */
+/*   Updated: 2026/11/09 17:23:45 by pedrohe3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ int	main(int ac, char **av)
 	args = parse_args(av + 1);
 	if (!create_hub(&args))
 		printf("Error: Failed to create hub, aborting...\n");
-	printf("Testing\n");
 	return (0);
 }
 
